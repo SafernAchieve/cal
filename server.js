@@ -37,7 +37,7 @@ app.get('/events', async (req, res) => {
 });
 
 
-const PORT = process.env.PORT || 4000; // Use the correct port from Azure or fallback to 4000
+const PORT = process.env.PORT || 4000; // Use  correct port from Azure or fallback to 4000
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
