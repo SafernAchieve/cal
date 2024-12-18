@@ -11,7 +11,7 @@ const server = http.createServer(app); // Create an HTTP server using Express
 
 
 app.use(cors({
-  origin: '*', // Replace with actual frontend URL
+  origin: '*',
 }));
 
 
