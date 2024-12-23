@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { DayPilot, DayPilotCalendar } from "daypilot-pro-react";
 import { getEvents } from "./event_loader";
 import resources_obj from "./resources";
-
+import TimePicker from 'react-time-picker';
 const Calendar = () => {
   const [selectedPurpose, setSelectedPurpose] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
@@ -11,7 +11,16 @@ const Calendar = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [selectedEvents, setSelectedEvents] = useState([]);
+  const [selectedName, setSelectedName] = useState("All");
   const [zoomLevel, setZoomLevel] = useState(1); 
+  const [startTime, setStartTime] = useState("14"); 
+  const [endTime, setEndTime] = useState("19"); 
+
+
+
+
+
+  
   const [config, setConfig] = useState({
     locale: "en-us",
     columnWidthSpec: "Auto",
@@ -21,6 +30,11 @@ const Calendar = () => {
     cellHeight: 30,
     crosshairType: "Header",
     showCurrentTime: false,
+
+    businessBeginsHour : startTime,
+    businessEndsHour : endTime,
+    showNonBusiness: false,
+    
     // eventArrangement: "Cascade",
     allowEventOverlap: true,
     timeRangeSelectedHandling: "Enabled",
@@ -71,11 +85,41 @@ const Calendar = () => {
         )
       );
     },
+   
     eventClickHandling: "Disabled",
     eventHoverHandling: "Disabled",
   });
 
   const calendarRef = useRef(null);
+
+
+
+  const handleStartTimeChange = (e) => {
+    const time = e.target.value;  // Time in HH:mm format (e.g., "14:30")
+     // Set the full time string in HH:mm format
+
+    // Extract the hour and update the config with just the hour part
+    const businessBeginsHour = parseInt(time.split(":")[0], 10); // Extract hour from "HH:mm"
+    setStartTime(time);
+setEndTime(20)
+
+
+
+    // Update config object with the extracted hour
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      businessBeginsHour: 16, // Update with just the hour
+      businessEndsHour: endTime
+    }));
+   
+  };
+
+  // Function to handle the end time change
+  const handleEndTimeChange = (e) => {
+    const time = e.target.value;  // Time in HH:mm format (e.g., "19:00")
+    setEndTime(time); // Set the full time string in HH:mm format
+  };
+  
   const loadEvents = async () => {
     const events = await getEvents(startDate, endDate);
     console.log(
@@ -86,6 +130,7 @@ const Calendar = () => {
     const e = events.map((event) => ({
       start: new DayPilot.Date(event.start),
       end: new DayPilot.Date(event.end),
+      
       text: event.summary,
       id: event.uid,
       resource: event.resources,
@@ -103,7 +148,11 @@ const Calendar = () => {
     loadEvents();
   }, []);
 
-  const initializeResources = (date, purpose = "All", location = "All") => {
+
+
+  const initializeResources = (date, purpose = "All", location = "All", name = "All") => {
+    
+    console.log()
     const resources = resources_obj.map((resource) => ({
       ...resource,
       start: date,
@@ -112,10 +161,22 @@ const Calendar = () => {
     return resources.filter((resource) => {
       return (
         (purpose === "All" || resource.purpose === purpose) &&
-        (location === "All" || resource.location === location)
+        (location === "All" || resource.location === location)&&
+        (name === "All" || resource.name === name)
+        
       );
     });
   };
+
+
+
+
+  const handleNameChange = (e) => {
+    setSelectedName(e.target.value);
+  };
+
+
+
 
   const handlePurposeChange = (e) => {
     setSelectedPurpose(e.target.value);
@@ -167,6 +228,15 @@ const Calendar = () => {
   }
 
   
+  
+  
+
+
+
+
+
+
+
 
   const daysResources = () => {
     const columns = [];
@@ -188,8 +258,11 @@ const Calendar = () => {
       const dayResources = initializeResources(
         currentDay,
         selectedPurpose,
-        selectedLocation
+        selectedLocation,
+        selectedName
       );
+
+      
 
       columns.push({
         id: i,
@@ -203,10 +276,17 @@ const Calendar = () => {
       });
     }
 
+    const columnWidth =
+    selectedName !== "All" &&
+    selectedPurpose === "All" &&
+    selectedLocation === "All"
+      ? 210
+      : 120;
+
     setConfig({
       ...config,
       columnWidthSpec: "Fixed",
-      columnWidth: 120,
+      columnWidth: columnWidth,
       columns,
       headerLevels: 2,
       events: allEvents,
@@ -254,6 +334,7 @@ useEffect(() => {
           </label>
         </div>
         <div>
+      
           <label>
             End Date:{" "}
             <input
@@ -284,6 +365,33 @@ useEffect(() => {
             <option value="WC">WC</option>
           </select>
         </label>
+        Name:
+        <select onChange={handleNameChange} value={selectedName}>
+  <option value="All">All</option> {/* Add an option for "All" */}
+  {resources_obj.map((resource) => (
+    <option key={resource.name} value={resource.name}>
+      {resource.name}
+    </option>
+  ))}
+</select>
+<label>
+          Start Time:{" "}
+          <input
+      type="time"
+      value={startTime}
+      onChange={handleStartTimeChange} // Corrected onChange handler
+    />
+        </label>
+
+        <label>
+          End Time:{" "}
+          <input
+            type="time"
+            value={endTime}
+            
+            format="HH:mm"
+          />
+        </label>
         <input
           name="view"
           type="button"
@@ -301,6 +409,7 @@ useEffect(() => {
         startField="start"
         endField="end"
         resourceField="resource"
+       startTime ={startTime}
       />
     </div>
   );

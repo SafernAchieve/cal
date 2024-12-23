@@ -12,6 +12,7 @@ export const getEvents = async (start, end) => {
     const startDate = new DayPilot.Date(start)
     const endDate = new DayPilot.Date(end)
     const response = await axios.get(`${URL}?start=${startDate}&end=${endDate}`)
+    console.log(response.data)
     return response.data
 }
 

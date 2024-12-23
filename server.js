@@ -20,7 +20,8 @@ app.use(cors({
 app.get('/events', async (req, res) => {
   const URL = "https://achieverooms.skedda.com/ical?k=eB-6EIgw0y8kUatcEd793SMsgYayCgku&i=574591"
   const response = await fetch(URL)
-  const events = ICAL.parseICS( await response.text())
+  const events = ICAL.parseICS( await response.json())
+ 
   const startDate = new Date(req.query.start)
   const end = new Date(req.query.end)
   end.setHours(23)
